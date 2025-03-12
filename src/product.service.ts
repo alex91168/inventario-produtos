@@ -16,13 +16,13 @@ export class ProductService implements IProductService{
         { id: 14179612811, Product_name: 'Produto 1', Product_price: 10, Product_quantity: 100, Product_type: 'Tipo 4' },
     ];
 
-    async createProduct(createProductDto: CreateProductDto): Promise<any> {
+    async createProduct(createProductDto: CreateProductDto): Promise<{message: string}> {
         const newProduct = {...createProductDto, id: Date.now()};
         this.products_list.push(newProduct); 
-        return newProduct;
+        return { message: `${newProduct.Product_name} criado com sucesso!`};
     }
 
-    async removeProduct(product_id: number): Promise<any> {
+    async removeProduct(product_id: number): Promise<{message: string}> {
         const removeProduct = this.products_list.findIndex(p => p.id === Number(product_id));
         if(removeProduct === -1){
             return { message: "Não foi encontrado"}

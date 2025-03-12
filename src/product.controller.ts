@@ -27,7 +27,7 @@ export class ProductController {
             try 
             {
                 const create_product = await this._context.createProduct(createProductDto);
-                return ({message: `${create_product.Product_name} criado com sucesso!`});
+                return create_product;
             }
             catch (err)
             {
