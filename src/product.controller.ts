@@ -7,7 +7,7 @@ import { productList } from './Interface/product-list.interface';
 export class ProductController {
     constructor(private readonly _context: ProductService) {}
         @Get()
-        async findAllData(@Param('type') type: string)
+        async findAllData()
         {
             const listProductsData = await this._context.listAllProducts();
             return listProductsData;
