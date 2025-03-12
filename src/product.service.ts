@@ -2,6 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { IProductService } from "./Interface/product-service.interface";
 import { productList } from "./Interface/product-list.interface";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 @Injectable()
 export class ProductService implements IProductService{
@@ -17,22 +20,24 @@ export class ProductService implements IProductService{
     ];
 
     async createProduct(createProductDto: CreateProductDto): Promise<{message: string}> {
-        const newProduct = {...createProductDto, id: Date.now()};
-        this.products_list.push(newProduct); 
-        return { message: `${newProduct.Product_name} criado com sucesso!`};
+        const newProduct = await prisma.product.create({ data: {id: Date.now(), ...createProductDto} }); 
+        return { message: `${newProduct.name} criado com sucesso!`};
     }
 
     async removeProduct(product_id: number): Promise<{message: string}> {
-        const removeProduct = this.products_list.findIndex(p => p.id === Number(product_id));
-        if(removeProduct === -1){
+        const findProduct = await prisma.product.findUnique({where: {id: product_id}});
+
+        if(!findProduct){
             return { message: "Não foi encontrado"}
         }
-        this.products_list.splice(removeProduct, 1);
-        return { message: "Produto deletado com sucesso!"}
+
+        await prisma.product.delete({ where:  {id: product_id}});
+        return { message: `Produto ${findProduct.name} foi deletado com sucesso!`}
     }
 
-    async findProduct(product_id: number): Promise<productList | {message: string}> {
-       const product = this.products_list.find(p => p.id === Number(product_id)); 
+    async findProduct(product_id: number): Promise<any> {
+       const product = await prisma.product.findUnique({where: {id: product_id}}) 
+
        if (!product){
             return { message: "Produto não encontrado"};
        }
@@ -41,9 +46,8 @@ export class ProductService implements IProductService{
 
     async listAllProducts(product_type?: string[]): Promise<any> {
         if (product_type){
-            const listAllProducts = this.products_list.filter(p => product_type.includes(p.Product_type));
-            return listAllProducts;
+            return await prisma.product.findMany({where: {type: {in: product_type}}});
         }
-        return this.products_list;
+        return prisma.product.findMany();
     }
 }

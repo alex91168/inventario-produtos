@@ -12,3 +12,14 @@ datasource db {
   provider = "sqlserver"
   url      = env("DATABASE_URL")
 }
+
+model Product {
+  id Int @id @default(autoincrement(DateTime.Now))
+  name String
+  price Float
+  quantity Int
+  type String
+  description String?
+  image String?
+  creationDate DateTime @default(now())
+}

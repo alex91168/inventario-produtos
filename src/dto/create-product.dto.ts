@@ -5,27 +5,27 @@ export class CreateProductDto {
 
     @IsString()
     @IsNotEmpty()
-    readonly Product_name: string;
+    readonly name: string;
 
     @IsNumber()
     @IsPositive()
     @IsNotEmpty()
-    readonly Product_price: number;
+    readonly price: number;
 
     @IsNumber()
     @IsPositive()
     @Min(1)
-    readonly Product_quantity: number
+    readonly quantity: number
 
     @IsNotEmpty()
-    readonly Product_type: string;
+    readonly type: string;
 
     @IsOptional()
     @IsString()
-    readonly Product_description?: string;
+    readonly description?: string;
 
     
     @IsOptional()
     @IsString()
-    readonly Product_image?: string;
+    readonly image?: string;
 }
