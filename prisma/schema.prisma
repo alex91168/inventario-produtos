@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Product {
-  id Int @id @default(autoincrement(DateTime.Now))
+  id Int @id
   name String
   price Float
   quantity Int

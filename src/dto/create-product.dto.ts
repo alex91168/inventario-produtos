@@ -18,11 +18,11 @@ export class CreateProductDto {
     readonly quantity: number
 
     @IsNotEmpty()
-    readonly type: string;
+    readonly type: any;
 
     @IsOptional()
     @IsString()
-    readonly description?: string;
+    readonly description?: any;
 
     
     @IsOptional()
