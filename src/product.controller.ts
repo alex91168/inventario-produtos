@@ -19,6 +19,17 @@ export class ProductController {
             const listProductsData = await this._context.listAllProducts(splitParam);
             return listProductsData;
         }
+        @Get('/services/types')
+        async getAllTypes()
+        {
+            try{
+                const getTypes = await this._context.filterTypesOfProducts();
+                console.log('Vindo de types', getTypes)
+                return getTypes
+            } catch (err){
+                return { message: err }
+            }
+        }
 
         @Post()
         @UsePipes(new ValidationPipe())

@@ -8,6 +8,13 @@ const prisma = new PrismaClient();
 @Injectable()
 export class ProductService implements IProductService{
 
+    async filterTypesOfProducts(): Promise<{ message: string[]; }> {
+        const findTypes = await prisma.product.findMany({ select: { type: true }})
+        const setTypes = new Set(findTypes.map((t: any) => t.type));
+        const setArray = Array.from(setTypes);
+        return {message: setArray}
+    }
+
     async createProduct(createProductDto: CreateProductDto): Promise<{message: string}> {
         const randomId = Number(Date.now() % 2147483647);
         const newProduct = await prisma.product.create({ data: { id: randomId, ...createProductDto} }); 

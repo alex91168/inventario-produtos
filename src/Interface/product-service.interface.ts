@@ -6,4 +6,5 @@ export interface IProductService {
     createProduct(createProductDto: CreateProductDto): Promise<{message: string}>;
     removeProduct(product_id: number): Promise<{message: string}>;
     findProduct(product_id: number): Promise<any>;
+    filterTypesOfProducts(): Promise<{message: string[]}>
 }
