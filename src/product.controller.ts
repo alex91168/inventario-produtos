@@ -24,7 +24,6 @@ export class ProductController {
         {
             try{
                 const getTypes = await this._context.filterTypesOfProducts();
-                console.log('Vindo de types', getTypes)
                 return getTypes
             } catch (err){
                 return { message: err }
@@ -52,7 +51,7 @@ export class ProductController {
             if(isNaN(product_id)){
                 return {message: "ID invalido"};
             }
-            const remove_product = await this._context.removeProduct(id);
+            const remove_product = await this._context.removeProduct(product_id);
             return remove_product;
         }
 
