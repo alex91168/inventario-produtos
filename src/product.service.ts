@@ -2,11 +2,38 @@ import { Injectable } from "@nestjs/common";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { IProductService } from "./Interface/product-service.interface";
 import { PrismaClient } from "@prisma/client";
+import { UpdateDtoProduct } from "./dto/update-product.dto";
 
 const prisma = new PrismaClient();
 
 @Injectable()
 export class ProductService implements IProductService{
+
+    async createProductPlanilha(createProductDto: CreateProductDto[]): Promise<any> {
+        for(let item of createProductDto){
+            const randomId = Number(Date.now() % 2147483647);
+            await prisma.product.create({ data: { id: randomId, ...item} }); 
+        }
+        return {message: "Produtos criados com sucesso!"}
+    }
+
+    async pagination(page: number, limit: number, type?: string[]): Promise<any> {
+        if ( page <= 0  || isNaN(page) ){ page = 1 }
+        const offset = (page - 1) * limit;
+        const typeCondition = type ? { type: {in: type} } : {};
+
+        const products = await prisma.product.findMany({
+            skip: offset, 
+            take: limit, 
+            orderBy: { creationDate: 'desc' },
+            where: typeCondition
+        });
+
+        const totalProducts = await prisma.product.count({ where: typeCondition });
+        const totalPagesNumber = Math.ceil(totalProducts / limit);
+        const totalPages = Array.from({ length: totalPagesNumber }, (_, i) => i + 1);
+        return { products, totalProducts, totalPages };
+    }
 
     async filterTypesOfProducts(): Promise<{ message: string[]; }> {
         const findTypes = await prisma.product.findMany({ select: { type: true }})
@@ -17,8 +44,8 @@ export class ProductService implements IProductService{
 
     async createProduct(createProductDto: CreateProductDto): Promise<{message: string}> {
         const randomId = Number(Date.now() % 2147483647);
-        const newProduct = await prisma.product.create({ data: { id: randomId, ...createProductDto} }); 
-        return { message: `${newProduct.name} criado com sucesso!`};
+        await prisma.product.create({ data: { id: randomId, ...createProductDto} }); 
+        return {message: `${createProductDto.name} criado com sucesso!`}
     }
 
     async removeProduct(product_id: number): Promise<{message: string}> {
@@ -32,19 +59,14 @@ export class ProductService implements IProductService{
         return { message: `Produto ${findProduct.name} foi deletado com sucesso!`}
     }
 
-    async findProduct(product_id: number): Promise<any> {
-       const product = await prisma.product.findUnique({where: {id: product_id}}) 
-
-       if (!product){
-            return { message: "Produto não encontrado"};
-       }
-       return product;
-    }
-
-    async listAllProducts(product_type?: string[]): Promise<any> {
-        if (product_type){
-            return await prisma.product.findMany({where: {type: {in: product_type}}});
+    async editProduct(product_id: number, updateDtoProduct: UpdateDtoProduct): Promise<{message: string}> { 
+        const updateProductCondition = updateDtoProduct ? updateDtoProduct : {};
+        try{
+            const editarProduct = await prisma.product.update({where: {id: product_id}, data: updateProductCondition});
+            if (!editarProduct){ return { message: "Produto não encontrado"};}
+            return {message: `${editarProduct.id} editado com sucesso!`};
+        } catch (err) {
+            throw new Error(err);
         }
-        return prisma.product.findMany();
     }
 }

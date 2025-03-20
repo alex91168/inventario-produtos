@@ -1,24 +1,13 @@
-import { Controller, Post, Body, Delete, Param, Get, UsePipes, ValidationPipe} from '@nestjs/common';
+import { Controller, Post, Body, Delete, Param, Get, UsePipes, ValidationPipe, Put} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { productList } from './Interface/product-list.interface';
+import { log } from 'console';
+import { UpdateDtoProduct } from './dto/update-product.dto';
 
 @Controller('products')
 export class ProductController {
     constructor(private readonly _context: ProductService) {}
-        @Get()
-        async findAllData()
-        {
-            const listProductsData = await this._context.listAllProducts();
-            return listProductsData;
-        }
-        @Get(':type')
-        async findByType(@Param('type') type: string)
-        {
-            const splitParam = type.split(';');
-            const listProductsData = await this._context.listAllProducts(splitParam);
-            return listProductsData;
-        }
         @Get('/services/types')
         async getAllTypes()
         {
@@ -44,6 +33,20 @@ export class ProductController {
                 return {message: "Erro ao criar produto no banco de dados" , err};
             }
         }
+        @Post('/planilha')
+        @UsePipes(new ValidationPipe())
+        async createPlanilha(@Body() createProductDto: CreateProductDto[]) 
+        {
+            try 
+            {
+                const create_product = await this._context.createProductPlanilha(createProductDto);
+                return create_product;
+            }
+            catch (err)
+            {
+                return {message: "Erro ao criar produto no banco de dados" , err};
+            }
+        }
         @Delete(':id')
         async remove(@Param('id') id: number)
         {
@@ -55,16 +58,39 @@ export class ProductController {
             return remove_product;
         }
 
-        @Get(':id')
-        async find(@Param('id') id: number): Promise<productList | {message: string}>
+        @Put('update/:id')
+        @UsePipes(new ValidationPipe())
+        async find(@Param('id') id: number, @Body() dados: any ): Promise<productList | {message: string}>
         {
+            if(dados.quantity){ dados.quantity = Number(dados.quantity) }; 
+            if(dados.price) {dados.price = Number(dados.price) };
             const product_id = Number(id);
-            if(isNaN(product_id)){
-                return {message: "ID invalido"};
+            if(isNaN(product_id) && isNaN(dados.price) && isNaN(dados.quantity)){
+                return {message: "Um ou mais dados invalidos"};
             }
-            const find_product = await this._context.findProduct(id);
-            return find_product;
+            const edit_product = await this._context.editProduct(product_id, dados);
+            return edit_product;
         }
-
+        
+        @Get('/pagination/:page')
+        async pagination(@Param('page') page: any): Promise<any>
+        {
+            const [totalPage, totalLimite] = page.split(';');
+            const totalPageAsNumber = Number(totalPage);
+            const totalLimiteAsNumber = Number(totalLimite);
+            const pagination = await this._context.pagination(totalPageAsNumber, totalLimiteAsNumber);
+            return pagination
+        }
+        @Get('/pagination/:page/:type')
+        async paginationWithType(@Param('page') page: any, @Param('type') type: string): Promise<any>
+        {
+            const types = type.split(';');
+            const [totalPage, totalLimite] = page.split(';');
+            const totalPageAsNumber = Number(totalPage);
+            const totalLimiteAsNumber = Number(totalLimite);
+            const pagination = await this._context.pagination(totalPageAsNumber, totalLimiteAsNumber, types);
+            return pagination
+        }
+      
 }
 
