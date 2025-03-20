@@ -56,7 +56,7 @@ export class ProductService implements IProductService{
         }
 
         await prisma.product.delete({ where:  {id: product_id}});
-        return { message: `Produto ${findProduct.name} foi deletado com sucesso!`}
+        return { message: `Produto ${findProduct.id} foi deletado com sucesso!`}
     }
 
     async editProduct(product_id: number, updateDtoProduct: UpdateDtoProduct): Promise<{message: string}> { 
