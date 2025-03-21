@@ -7,5 +7,5 @@ export interface IProductService {
     removeProduct(product_id: number): Promise<{message: string}>;
     editProduct(product_id: number, updateDtoProduct: UpdateDtoProduct): Promise<{message: string}>;
     filterTypesOfProducts(): Promise<{message: string[]}>
-    pagination( page: number, limit: number, type: string[] ): Promise<any>;
+    pagination( page: number, limit: number, type: string[], search: string ): Promise<any>;
 }

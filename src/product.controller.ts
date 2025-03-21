@@ -1,7 +1,6 @@
 import { Controller, Post, Body, Delete, Param, Get, UsePipes, ValidationPipe, Put, Query, BadRequestException} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { productList } from './Interface/product-list.interface';
 
 @Controller('products')
 export class ProductController {
@@ -58,7 +57,7 @@ export class ProductController {
 
         @Put('update/:id')
         @UsePipes(new ValidationPipe())
-        async find(@Param('id') id: number, @Body() dados: any ): Promise<productList | {message: string}>
+        async find(@Param('id') id: number, @Body() dados: any ): Promise<{message: string}>
         {
             if(dados.quantity){ dados.quantity = Number(dados.quantity) }; 
             if(dados.price) {dados.price = Number(dados.price) };
@@ -77,10 +76,8 @@ export class ProductController {
             const [totalPage, totalLimite] = page.split(';');
             const totalPageAsNumber = Number(totalPage);
             const totalLimiteAsNumber = Number(totalLimite);
-            if(isNaN(totalPageAsNumber) ||  isNaN(totalLimiteAsNumber)){
-                return new BadRequestException('Numero de pagina ou limite invalidos');
-            }
-            const typeSplit = type ? type.split(';') : undefined;
+
+            const typeSplit = type ? type.split(',') : undefined;
             const pagination = await this._context.pagination(totalPageAsNumber, totalLimiteAsNumber, typeSplit, search);
             return pagination
         }
