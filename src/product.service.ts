@@ -17,19 +17,20 @@ export class ProductService implements IProductService{
         return {message: "Produtos criados com sucesso!"}
     }
 
-    async pagination(page: number, limit: number, type?: string[]): Promise<any> {
+    async pagination(page: number, limit: number, type?: string[], search?: string): Promise<any> {
         if ( page <= 0  || isNaN(page) ){ page = 1 }
         const offset = (page - 1) * limit;
-        const typeCondition = type ? { type: {in: type} } : {};
-
+        const conditions: any = {};
+        if(type){ conditions.type = { in: type };}
+        if(search){ conditions.name = { contains: search };}
         const products = await prisma.product.findMany({
             skip: offset, 
             take: limit, 
             orderBy: { creationDate: 'desc' },
-            where: typeCondition
+            where: conditions
         });
 
-        const totalProducts = await prisma.product.count({ where: typeCondition });
+        const totalProducts = await prisma.product.count({ where: conditions});
         const totalPagesNumber = Math.ceil(totalProducts / limit);
         const totalPages = Array.from({ length: totalPagesNumber }, (_, i) => i + 1);
         return { products, totalProducts, totalPages };

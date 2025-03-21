@@ -1,9 +1,7 @@
-import { Controller, Post, Body, Delete, Param, Get, UsePipes, ValidationPipe, Put} from '@nestjs/common';
+import { Controller, Post, Body, Delete, Param, Get, UsePipes, ValidationPipe, Put, Query, BadRequestException} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { productList } from './Interface/product-list.interface';
-import { log } from 'console';
-import { UpdateDtoProduct } from './dto/update-product.dto';
 
 @Controller('products')
 export class ProductController {
@@ -73,24 +71,18 @@ export class ProductController {
         }
         
         @Get('/pagination/:page')
-        async pagination(@Param('page') page: any): Promise<any>
+        async pagination(@Param('page') page: any, @Query('type') type?:string, @Query('search') search?: string): Promise<any>
         {
+            console.log(type, search);
             const [totalPage, totalLimite] = page.split(';');
             const totalPageAsNumber = Number(totalPage);
             const totalLimiteAsNumber = Number(totalLimite);
-            const pagination = await this._context.pagination(totalPageAsNumber, totalLimiteAsNumber);
+            if(isNaN(totalPageAsNumber) ||  isNaN(totalLimiteAsNumber)){
+                return new BadRequestException('Numero de pagina ou limite invalidos');
+            }
+            const typeSplit = type ? type.split(';') : undefined;
+            const pagination = await this._context.pagination(totalPageAsNumber, totalLimiteAsNumber, typeSplit, search);
             return pagination
         }
-        @Get('/pagination/:page/:type')
-        async paginationWithType(@Param('page') page: any, @Param('type') type: string): Promise<any>
-        {
-            const types = type.split(';');
-            const [totalPage, totalLimite] = page.split(';');
-            const totalPageAsNumber = Number(totalPage);
-            const totalLimiteAsNumber = Number(totalLimite);
-            const pagination = await this._context.pagination(totalPageAsNumber, totalLimiteAsNumber, types);
-            return pagination
-        }
-      
 }
 
